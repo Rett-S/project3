@@ -157,6 +157,24 @@ int main(int argc, char** argv) {
          add(pTable, n, pid, currentSec, currentNano);
          printPCB(pTable,n);
 
+         int shmid =shmget(SHMKEY, BUFF_SZ, 0777 | IPC_CREAT);
+         if (shmid ==-1){
+                 printf("OSS:error with shmget\n");
+                 exit(1);
+         }
+
+         int *pint = (int*)(shmat(shmid,0,0));
+         int *nint = pint + 1;
+
+         remove("LogFile.log");
+
+         FILE *log;
+         log = fopen("LogFile.log", "a");
+         if (log == NULL){
+                printf("Error creating log file");
+                exit(1);
+         }
+
          while (totalLaunched < n) {
           if (currentProc < s) {
            childPid = fork();
@@ -179,15 +197,17 @@ int main(int argc, char** argv) {
           }
          }
       
-        for (int y=0;y<n;y++) {
+     for (int y=0;y<n;y++) {
          buf1.mtype = child[y];
          buf1.intData = child[y];
          strcpy(buf1.strData,"begin");
          printf("Sending message to worker\n");
+         fprintf(log,"OSS: Sending message to worker %d PID %d at time %d:%d\n",y,child[y],*pint,*nint);
          if (msgsnd(msqid, &buf1, sizeof(msgbuffer)-sizeof(long), 0) == -1) {
                 perror("msgsend to worker failed\n");
                 exit(1);
          }
+         fprintf(log,"OSS: Receiving message from worker %d PID %d at time %d:%d\n",y,child[y],*pint,*nint);
          msgbuffer rcvbuf;
          if (msgrcv(msqid, &rcvbuf, sizeof(msgbuffer), getpid(),0) == -1) {
                 perror("failed to receive message in oss\n");
@@ -196,7 +216,8 @@ int main(int argc, char** argv) {
          }
          int toend;
          wait(it);
-         printf("Oss received message:%s\n", rcvbuf.strData);
+         printf("Oss received message: %s\n", rcvbuf.strData);
+
 
          /*for (int h=0;h<65;h++) {
                 if (msgrcv(msqid, &rcvbuf, sizeof(msgbuffer), getpid(), 0) == -1) {
