@@ -73,6 +73,15 @@ int main(int argc, char** argv) {
       //printf("WORKER PID:%d PPID:%d SysClockS:%d SysClockNano:%d TermTimeS:%d TermTimeNano:%d\n", getpid(),getppid(),*cint,*xint,s,n);
     }
 
+    buf.mtype =getppid();
+    buf.intData =getppid();
+    strcpy(buf.strData, "worker done");
+
+    if (msgsnd(msqid,&buf,sizeof(msgbuffer)-sizeof(long),0)==-1){
+        perror("msgsnd to parent failed\n");
+        exit(1);
+    }
+
     shmdt(cint);
     shmdt(xint);
     return EXIT_SUCCESS;

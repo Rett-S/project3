@@ -179,22 +179,49 @@ int main(int argc, char** argv) {
           }
          }
       
-        buf1.mtype = child[0];
-        buf1.intData = child[0];
-        strcpy(buf1.strData,"begin");
-
-        if (msgsnd(msqid, &buf1, sizeof(msgbuffer)-sizeof(long), 0) == -1) {
-                perror("msgsend to child 0 failed\n");
+        for (int y=0;y<n;y++) {
+         buf1.mtype = child[y];
+         buf1.intData = child[y];
+         strcpy(buf1.strData,"begin");
+         printf("Sending message to worker\n");
+         if (msgsnd(msqid, &buf1, sizeof(msgbuffer)-sizeof(long), 0) == -1) {
+                perror("msgsend to worker failed\n");
                 exit(1);
+         }
+         msgbuffer rcvbuf;
+         if (msgrcv(msqid, &rcvbuf, sizeof(msgbuffer), getpid(),0) == -1) {
+                perror("failed to receive message in oss\n");
+                exit(1);
+
+         }
+         int toend;
+         wait(it);
+         printf("Oss received message:%s\n", rcvbuf.strData);
+
+         /*for (int h=0;h<65;h++) {
+                if (msgrcv(msqid, &rcvbuf, sizeof(msgbuffer), getpid(), 0) == -1) {
+                   perror ("failed to receive message from child\n");
+                   exit(1);
+                }
+                toend = strcmp(rcvbuf.strData,"done");
+                if (toend == 0) {
+                   printf("Parent received message, moving to next child.");
+                   break;
+                }
+                if (h=60) {
+                   exit(1);
+                }
+
+         }*/
+
+         //printf("Parent received message:%s\n", rcvbuf.strData);
         }
-
-
-
         break;
     }
  }
  return 0;
 }
+
 
 
   /*if (strcmp(argv[1], x) == 0) { //if -h is present, displays a help message only
