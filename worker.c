@@ -10,6 +10,13 @@
 
 #define SHMKEY 44197
 #define BUFF_SZ sizeof (int)
+#define PERMS 0771
+
+typedef struct msgbuffer {
+        long mtype;
+        char strData[100];
+        int intData;
+} msgbuffer; 
 
 int main(int argc, char** argv) {
 

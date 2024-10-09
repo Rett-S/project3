@@ -14,9 +14,15 @@ void clean();
 
 #define SHMKEY 44197
 #define BUFF_SZ sizeof (int)
+#define PERMS 0771
 
 int n,s,t,it,totalLaunched,currentProc,childPid;
 
+typedef struct msgbuffer {
+        long mtype;
+        char strData[100];
+        int intData;
+} msgbuffer; 
 
 typedef struct PCB_0 {
     int occupied; // either true or false
@@ -74,6 +80,24 @@ int main(int argc, char** argv) {
 
   char* x = "-h"; //x and y are used later to compare two strings
   char* y = "-n";
+
+  
+  msgbuffer buf0, buf1;
+  int msqid;
+  key_t key;
+  system( "touch msgq.txt");
+  if ((key = ftok("msgq.txt", 1)) == -1) {
+    perror("ftok");
+    exit(1);
+  }
+
+  if ((msqid = msgget(key, PERMS | IPC_CREAT)) == -1) {
+    perror("msgget in parent");
+    exit(1);
+  }
+
+  pid_t child[2];
+
 
   switch (fork()) {
     case -1:
