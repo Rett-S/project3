@@ -1,4 +1,4 @@
-CS 4500 - Project 2: System Clock
+CS 4500 - Project 3: Adding Message Passing
 Rett Swyers
 
 Intructions on how to run this file:

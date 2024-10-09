@@ -17,13 +17,55 @@ void clean();
 
 int n,s,t,it,totalLaunched,currentProc,childPid;
 
-struct PCB {
+
+typedef struct PCB_0 {
     int occupied; // either true or false
     pid_t pid; // process id of this child
-    int startSeconds; // time when it was forked
-    int startNano; // time when it was forked
-};
-struct PCB processTable[20];
+    int seconds; // time when it was forked
+    int nanoseconds; // time when it was forked
+} PCB;
+//struct PCB processTable[20];
+
+PCB *pTable;
+PCB *create(int size){
+        PCB *table = (PCB *)malloc(sizeof(PCB) * size);
+        int i;
+        for (i=0;i<size;i++){
+                table[i].occupied=0;
+                table[i].pid=0;
+                table[i].seconds=0;
+                table[i].nanoseconds=0;
+        }
+        return table;
+}
+
+void add(PCB *pTable, int size, pid_t pid, int seconds, int nanoseconds){
+        printf("adding to process table %d\n", pid);
+        for (int i=0;i<size;i++){
+                if (pTable[i].pid==0) {
+                        pTable[i].pid = pid;
+                        pTable[i].occupied = 1;
+                        pTable[i].seconds = seconds;
+                        pTable[i].nanoseconds = nanoseconds;
+                break;
+                }
+        }
+}
+
+void outputPCB(PCB *pTable, int size, FILE *output_stream) {
+        fprintf(output_stream, "Enter\tOccupied\tPID\t\tStartS\tStartN\n");
+        for(int i=0;i<size;i++){
+                if (pTable[i].pid==0){
+                        break;
+                }
+                fprintf(output_stream, "%5d\t%8d\t%4d\t%6d\t%d\n", i, pTable[i].occupied, pTable[i].pid,
+            pTable[i].seconds, pTable[i].nanoseconds);
+        }
+}
+
+void printPCB(PCB *pTable, int size){
+        outputPCB(pTable, size, stdout);
+}
 
 
 int main(int argc, char** argv) {
@@ -203,8 +245,15 @@ int main(int argc, char** argv) {
 void signal_handler(int sig) {
   // code to send kill signal to all children based on their PIDs in process table
 
-  free(processTable);
+  //free(processTable);
+  for (int i=0;i<n;i++){
+        if (pTable[i].pid==0){
+                break;
+        }
+        kill(pTable[i].pid, SIGKILL);
+  }
 
   exit(1);
 }
+             
       
