@@ -60,7 +60,7 @@ void add(PCB *pTable, int size, pid_t pid, int seconds, int nanoseconds){
 
 
 void outputPCB(PCB *pTable, int size, FILE *output_stream) {
-        fprintf(output_stream, "Occupied\tPID\t\tSeconds\tNanoseconds\n");
+        //fprintf(output_stream, "Occupied\tPID\t\tSeconds\tNanoseconds\n");
         for(int i=0;i<size;i++){
                 if (pTable[i].pid==0){
                         break;
@@ -86,17 +86,21 @@ int main(int argc, char** argv) {
   int msqid;
   key_t key;
   system( "touch msgq.txt");
+
   if ((key = ftok("msgq.txt", 1)) == -1) {
-    perror("ftok");
-    exit(1);
+      perror("ftok");
+      exit(1);
   }
 
   if ((msqid = msgget(key, PERMS | IPC_CREAT)) == -1) {
-    perror("msgget in parent");
-    exit(1);
+      perror("msgget in parent");
+      exit(1);
   }
 
-  pid_t child[2];
+  int m = atoi(argv[2]);
+
+  pid_t child[m];
+
 
 
   switch (fork()) {
@@ -149,6 +153,10 @@ int main(int argc, char** argv) {
          totalLaunched = 0; //keeps track of total processes
          currentProc = 0; //keeps track of active processes
 
+         pid_t pid = getpid();
+         add(pTable, n, pid, currentSec, currentNano);
+         printPCB(pTable,n);
+
          while (totalLaunched < n) {
           if (currentProc < s) {
            childPid = fork();
@@ -158,7 +166,10 @@ int main(int argc, char** argv) {
             char* args [] = {"./worker", argv[2]};
             execlp(args[0],args[1]);
            } else {
+            child[totalLaunched] = childPid;
             totalLaunched++;
+            //printf("Occupied\tPID\tSeconds\tNanoseconds\n");
+            //printPCB(pTable, n);
            }
           } else {
            for (int i=0;i<totalLaunched;i++) {
@@ -167,6 +178,17 @@ int main(int argc, char** argv) {
            }
           }
          }
+      
+        buf1.mtype = child[0];
+        buf1.intData = child[0];
+        strcpy(buf1.strData,"begin");
+
+        if (msgsnd(msqid, &buf1, sizeof(msgbuffer)-sizeof(long), 0) == -1) {
+                perror("msgsend to child 0 failed\n");
+                exit(1);
+        }
+
+
 
         break;
     }
