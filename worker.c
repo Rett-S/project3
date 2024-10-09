@@ -29,7 +29,8 @@ int main(int argc, char** argv) {
     for (int i=0;i<s;i++) {
       sleep(1);
     //SysClockS: %d SysClockNano: %d TermTimeS: %d TermTimeNano: %d - %d have passed since starting
-      printf("WORKER PID:%d PPID:%d SysClockS:%d SysClockNano:%d TermTimeS:%d TermTimeNano:%d\n", getpid(),getppid(),*cint,*xint,s,n);
+      printf("1\t%8d\t%4d\t%6d\t%d\n", getpid(), *cint, *xint);
+      //printf("WORKER PID:%d PPID:%d SysClockS:%d SysClockNano:%d TermTimeS:%d TermTimeNano:%d\n", getpid(),getppid(),*cint,*xint,s,n);
     }
 
     shmdt(cint);

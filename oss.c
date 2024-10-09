@@ -52,16 +52,18 @@ void add(PCB *pTable, int size, pid_t pid, int seconds, int nanoseconds){
         }
 }
 
+
 void outputPCB(PCB *pTable, int size, FILE *output_stream) {
-        fprintf(output_stream, "Enter\tOccupied\tPID\t\tStartS\tStartN\n");
+        fprintf(output_stream, "Occupied\tPID\t\tSeconds\tNanoseconds\n");
         for(int i=0;i<size;i++){
                 if (pTable[i].pid==0){
                         break;
                 }
-                fprintf(output_stream, "%5d\t%8d\t%4d\t%6d\t%d\n", i, pTable[i].occupied, pTable[i].pid,
+                fprintf(output_stream, "%8d\t%4d\t%6d\t%d\n", pTable[i].occupied, pTable[i].pid,
             pTable[i].seconds, pTable[i].nanoseconds);
         }
 }
+
 
 void printPCB(PCB *pTable, int size){
         outputPCB(pTable, size, stdout);
